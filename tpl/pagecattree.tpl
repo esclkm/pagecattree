@@ -1,7 +1,7 @@
 <!-- BEGIN: MAIN -->
 <ul class="bullets">
 	<!-- BEGIN: CATS -->
-	<li <!-- IF {ROW_SUBCAT} -->class="pcthavesubelems"<!-- ENDIF -->><a href="{ROW_HREF}">{ROW_TITLE}</a>
+	<li class="<!-- IF {ROW_SUBCAT} -->pcthavesubelems <!-- ENDIF -->{ROW_CLASS}"><a href="{ROW_HREF}">{ROW_TITLE}</a>
 		<!-- IF {ROW_SUBCAT} -->
 		<div class="pctsubelems">
 			{ROW_SUBCAT}
