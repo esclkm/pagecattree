@@ -5,8 +5,8 @@
  * Code=pagecattree
  * Name=pagecattree
  * Description=pagecattree Plugin for Seditio CMS
- * Version=2.6
- * Date=04-Sep-2011
+ * Version=2.7
+ * Date=04-May-2012
  * Author=esclkm, http://www.littledev.ru
  * Copyright=&copy; 2011 esclkm, http://www.littledev.ru
  * Notes=
@@ -20,12 +20,14 @@
  * [BEGIN_COT_EXT_CONFIG]
  * defcat=01:string:::Default categories selected, comma sep. Tags like {PHP.PAGECATTREE.CAT}
  * addpages=02:radio::1:Add pages in cat list
- * cache=03:radio::1:Enable cache 
- * maxlevel=04:string::3:Depth
- * query=05:string:::subquery for pages
- * rselected=06:string::selected:Replace for selected
- * rother=07:string:::Replace for other
- * cachetime=07:string::7200:Cache Time in sec
+ * addpagesforcurr=03:radio::1:Add pages in cat list only for current category
+ * maxpages=04:string::3:Max pages for tree element
+ * cache=05:radio::1:Enable cache 
+ * maxlevel=06:string::3:Depth
+ * query=07:string:::subquery for pages
+ * rselected=08:string::selected:Replace for selected
+ * rother=09:string:::Replace for other
+ * cachetime=10:string::7200:Cache Time in sec
  * [END_COT_EXT_CONFIG]
  */
 

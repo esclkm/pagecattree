@@ -30,6 +30,10 @@ if (!function_exists(cot_build_catstree))
 		{
 			$jj++;
 			$has_children = count(cot_structure_children('page', $row, false, false));
+			if ($has_children)
+			{
+				$t1->parse("MAIN.CATS.SUB");
+			}
 			$t1->assign(array(
 				"ROW_TITLE" => htmlspecialchars($structure['page'][$row]['title']),
 				"ROW_DESC" => $structure['page'][$row]['desc'],
@@ -41,6 +45,7 @@ if (!function_exists(cot_build_catstree))
 				"ROW_LEVEL" => $level,
 				"ROW_TYPE" => "cat",
 				"ROW_CLASS" => '[class_'.$row.']',
+				"ROW_PAGES" => '[pages_'.$row.']',
 				"ROW_ODDEVEN" => cot_build_oddeven($jj),
 				"ROW_JJ" => $jj
 			));
@@ -49,7 +54,8 @@ if (!function_exists(cot_build_catstree))
 		if ($cfg['plugin']['pagecattree']['addpages'])
 		{
 			$subquery = (!empty($cfg['plugin']['pagecattree']['query'])) ? ' AND '.$cfg['plugin']['pagecattree']['query'] : '';
-			$sql_p = $db->query("SELECT * FROM $db_pages WHERE (page_state=0 OR page_state=2) AND page_cat <> 'system' AND page_begin <= {$sys['now']} AND (page_expire = 0 OR page_expire > {$sys['now']}) AND page_cat = '" . $parent . "' $subquery ORDER BY page_title ASC");
+			$limit = ((int)$cfg['plugin']['pagecattree']['maxpages'] > 0) ? ' LIMIT '.(int)$cfg['plugin']['pagecattree']['maxpages'] : '';
+			$sql_p = $db->query("SELECT * FROM $db_pages WHERE (page_state=0 OR page_state=2) AND page_cat <> 'system' AND page_begin <= {$sys['now']} AND (page_expire = 0 OR page_expire > {$sys['now']}) AND page_cat = '" . $parent . "' $subquery ORDER BY page_title ASC $limit");
 
 			foreach ($sql_p->fetchAll() as $pag)
 			{
@@ -79,6 +85,49 @@ if (!function_exists(cot_build_catstree))
 		}
 		$t1->parse("MAIN");
 		return $t1->text("MAIN");
+	}
+
+}
+if (!function_exists(cot_build_catstree_pages))
+{
+
+	function cot_build_catstree_pages($parent, $selected, $template='')
+	{
+		global $structure, $cfg, $db_pages, $db, $sys;
+		$t1 = new XTemplate(cot_tplfile(array('pagecattree', $template), 'plug'));
+		if ($cfg['plugin']['pagecattree']['addpagesforcurr'] && !$cfg['plugin']['pagecattree']['addpages'])
+		{
+			$subquery = (!empty($cfg['plugin']['pagecattree']['query'])) ? ' AND '.$cfg['plugin']['pagecattree']['query'] : '';
+			$limit = ((int)$cfg['plugin']['pagecattree']['maxpages'] > 0) ? ' LIMIT '.(int)$cfg['plugin']['pagecattree']['maxpages'] : '';
+			$sql_p = $db->query("SELECT * FROM $db_pages WHERE (page_state=0 OR page_state=2) AND page_cat <> 'system' AND page_begin <= {$sys['now']} AND (page_expire = 0 OR page_expire > {$sys['now']}) AND page_cat = '" . $parent . "' $subquery ORDER BY page_title ASC $limit");
+
+			foreach ($sql_p->fetchAll() as $pag)
+			{
+				$jj++;
+				$pag['page_pageurl'] = (empty($pag['page_alias'])) ? cot_url('page', 'c=' . $pag['page_cat'] . '&id=' . $pag['page_id']) : cot_url('page', 'c=' . $pag['page_cat'] . '&al=' . $pag['page_alias']);
+				$t1->assign(array(
+					"ROW_TITLE" => htmlspecialchars($pag['page_title']),
+					"ROW_DESC" => htmlspecialchars($pag['page_desc']),
+					"ROW_ICON" => "",
+					"ROW_HREF" => $pag['page_pageurl'],
+					"ROW_SELECTED" => $pag['page_id'] == $selected,
+					"ROW_SUBCAT" => false,
+					"ROW_HASCHILD" => false,
+					"ROW_TYPE" => "page",
+					"ROW_CLASS" => '[class_page_'.$pag['page_id'].']',
+					"ROW_ODDEVEN" => cot_build_oddeven($jj),
+					"ROW_JJ" => $jj
+				));
+				$t1->assign(cot_generate_pagetags($pag, 'ROW_PAGE_'));
+				$t1->parse("PAGES.PAGE");
+			}
+		}
+		if ($jj == 0)
+		{
+			return '';
+		}
+		$t1->parse("PAGES");
+		return $t1->text("PAGES");
 	}
 
 }
@@ -125,7 +174,14 @@ if(count($PAGECATTREE) > 0 )
 		{
 			$PAGECATTREE[$k] = str_replace('[class_'.$children_elem.']', $cfg['plugin']['pagecattree']['rselected'], $PAGECATTREE[$k]);
 		}
+		if($cfg['plugin']['pagecattree']['addpagesforcurr'] && !$cfg['plugin']['pagecattree']['addpages'] && !empty($c))
+		{
+			$sub_pages = cot_build_catstree_pages($c, $_GET['e'] == 'page' ? $pag['page_id'] : 0, $k);
+			$PAGECATTREE[$k] = str_replace('[pages_'.$c.']', $sub_pages, $PAGECATTREE[$k]);
+			
+		}
 		$PAGECATTREE[$k] = preg_replace("/\[class_(.+?)\]/", $cfg['plugin']['pagecattree']['rother'], $PAGECATTREE[$k]);
+		$PAGECATTREE[$k] = preg_replace("/\[pages_(.+?)\]/", '', $PAGECATTREE[$k]);
 
 	}
 }
