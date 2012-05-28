@@ -149,7 +149,7 @@ if (!empty($cfg['plugin']['pagecattree']['defcat']) && $env['ext'] != 'admin' &&
 		$cache && $cache->db->store('PAGECATTREE', $PAGECATTREE, 'system', (int)$cfg['plugin']['pagecattree']['cachetime']);
 	}
 }
-if(count($PAGECATTREE) > 0 )
+if(!empty($cfg['plugin']['pagecattree']['defcat']) && $env['ext'] != 'admin' && is_array($PAGECATTREE) && count($PAGECATTREE) > 0 )
 {
 	$children_elems = array();
 	if($_GET['e'] == 'page')
