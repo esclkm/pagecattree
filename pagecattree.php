@@ -75,6 +75,9 @@ if (!function_exists(cot_build_catstree))
 		}
 		if ($cfg['plugin']['pagecattree']['addpages'])
 		{
+			$s = (!$db->fieldExists($db_pages, "page_$s")) ? 'title' : $cfg['page'][$parent]['order'];
+			$w = !empty($cfg['page'][$parent]['way']) ? $cfg['page'][$parent]['way'] : 'ASC';
+			
 			$subquery = (!empty($cfg['plugin']['pagecattree']['query'])) ? ' AND ' . $cfg['plugin']['pagecattree']['query'] : '';
 			$limit = ((int)$cfg['plugin']['pagecattree']['maxpages'] > 0) ? ' LIMIT ' . (int)$cfg['plugin']['pagecattree']['maxpages'] : '';
 
@@ -86,7 +89,7 @@ if (!function_exists(cot_build_catstree))
 				$join_condition .= " LEFT JOIN $db_i18n_pages AS i18n ON i18n.ipage_id = p.page_id AND i18n.ipage_locale = '$i18n_locale' AND i18n.ipage_id IS NOT NULL";
 			}
 
-			$sql_p = $db->query("SELECT p.* $join_columns FROM $db_pages AS p $join_condition WHERE (page_state=0 OR page_state=2) AND page_cat <> 'system' AND page_begin <= {$sys['now']} AND (page_expire = 0 OR page_expire > {$sys['now']}) AND page_cat = '" . $parent . "' $subquery ORDER BY page_title ASC $limit");
+			$sql_p = $db->query("SELECT p.* $join_columns FROM $db_pages AS p $join_condition WHERE (page_state=0 OR page_state=2) AND page_cat <> 'system' AND page_begin <= {$sys['now']} AND (page_expire = 0 OR page_expire > {$sys['now']}) AND page_cat = '" . $parent . "' $subquery ORDER BY page_$s $w $limit");
 
 			foreach ($sql_p->fetchAll() as $pag)
 			{
@@ -149,6 +152,9 @@ if (!function_exists(cot_build_catstree_pages))
 		$t1 = new XTemplate(cot_tplfile(array('pagecattree', $template), 'plug'));
 		if ($cfg['plugin']['pagecattree']['addpagesforcurr'] && !$cfg['plugin']['pagecattree']['addpages'])
 		{
+			$s = (!$db->fieldExists($db_pages, "page_$s")) ? 'title' : $cfg['page'][$parent]['order'];
+			$w = !empty($cfg['page'][$parent]['way']) ? $cfg['page'][$parent]['way'] : 'ASC';
+			
 			$subquery = (!empty($cfg['plugin']['pagecattree']['query'])) ? ' AND ' . $cfg['plugin']['pagecattree']['query'] : '';
 			$limit = ((int)$cfg['plugin']['pagecattree']['maxpages'] > 0) ? ' LIMIT ' . (int)$cfg['plugin']['pagecattree']['maxpages'] : '';
 
@@ -160,7 +166,7 @@ if (!function_exists(cot_build_catstree_pages))
 				$join_condition .= " LEFT JOIN $db_i18n_pages AS i18n ON i18n.ipage_id = p.page_id AND i18n.ipage_locale = '$i18n_locale' AND i18n.ipage_id IS NOT NULL";
 			}
 
-			$sql_p = $db->query("SELECT p.* $join_columns FROM $db_pages AS p $join_condition WHERE (page_state=0 OR page_state=2) AND page_cat <> 'system' AND page_begin <= {$sys['now']} AND (page_expire = 0 OR page_expire > {$sys['now']}) AND page_cat = '" . $parent . "' $subquery ORDER BY page_title ASC $limit");
+			$sql_p = $db->query("SELECT p.* $join_columns FROM $db_pages AS p $join_condition WHERE (page_state=0 OR page_state=2) AND page_cat <> 'system' AND page_begin <= {$sys['now']} AND (page_expire = 0 OR page_expire > {$sys['now']}) AND page_cat = '" . $parent . "' $subquery ORDER BY page_$s $w $limit");
 
 			foreach ($sql_p->fetchAll() as $pag)
 			{
